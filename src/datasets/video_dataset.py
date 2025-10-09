@@ -13,6 +13,7 @@ import numpy as np
 import pandas as pd
 import torch
 import torchvision
+from PIL import Image, ImageSequence
 from decord import VideoReader, cpu
 
 from src.datasets.utils.dataloader import ConcatIndices, MonitoredDataset, NondeterministicDataLoader
@@ -249,17 +250,52 @@ class VideoDataset(torch.utils.data.Dataset):
         sample = self.samples[index]
         dataset_idx, _ = self.per_dataset_indices[index]
         fpc = self.dataset_fpcs[dataset_idx]
-
-        try:
-            image_tensor = torchvision.io.read_image(path=sample, mode=torchvision.io.ImageReadMode.RGB)
-        except Exception:
-            return
+        # Handle multi-frame GIFs (treat like a short video) as well as static images.
+        ext = sample.split(".")[-1].lower()
         label = self.labels[index]
         clip_indices = [np.arange(start=0, stop=fpc, dtype=np.int32)]
 
-        # Expanding the input image [3, H, W] ==> [T, 3, H, W]
-        buffer = image_tensor.unsqueeze(dim=0).repeat((fpc, 1, 1, 1))
-        buffer = buffer.permute((0, 2, 3, 1))  # [T, 3, H, W] ==> [T H W 3]
+        # GIF: read all frames using PIL, sample/extend to fpc frames, return as torch tensor [T H W 3]
+        if ext == "gif":
+            try:
+                with Image.open(sample) as img:
+                    frames = []
+                    for fr in ImageSequence.Iterator(img):
+                        fr_rgb = fr.convert("RGB")
+                        frames.append(np.array(fr_rgb, dtype=np.uint8))
+
+                    if len(frames) == 0:
+                        return
+
+                    frames = np.stack(frames, axis=0)  # [T, H, W, 3]
+
+                    # If there are more frames than fpc, sample evenly; if fewer, repeat last frame.
+                    num_frames = frames.shape[0]
+                    if num_frames >= fpc:
+                        indices = np.linspace(0, num_frames - 1, num=fpc).astype(np.int64)
+                        frames = frames[indices]
+                    else:
+                        # repeat last frame to reach fpc
+                        repeats = fpc - num_frames
+                        last = np.expand_dims(frames[-1], axis=0)
+                        extra = np.repeat(last, repeats, axis=0)
+                        frames = np.concatenate((frames, extra), axis=0)
+
+                    # Keep as numpy uint8 array to match Decord's output ([T, H, W, 3])
+                    buffer = frames
+            except Exception:
+                return
+
+        else:
+            # Default: use torchvision to read static images (returns [3, H, W])
+            try:
+                image_tensor = torchvision.io.read_image(path=sample, mode=torchvision.io.ImageReadMode.RGB)
+            except Exception:
+                return
+
+            # Expanding the input image [3, H, W] ==> [T, 3, H, W]
+            buffer = image_tensor.unsqueeze(dim=0).repeat((fpc, 1, 1, 1))
+            buffer = buffer.permute((0, 2, 3, 1))  # [T, 3, H, W] ==> [T H W 3]
 
         if self.shared_transform is not None:
             # Technically we can have only transform, doing this just for the sake of consistency with videos.
