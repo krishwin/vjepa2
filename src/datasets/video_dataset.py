@@ -207,7 +207,7 @@ class VideoDataset(torch.utils.data.Dataset):
             if not isinstance(sample, str):
                 logger.warning("Invalid sample.")
             else:
-                if sample.split(".")[-1].lower() in ("jpg", "png", "jpeg"):
+                if sample.split(".")[-1].lower() in ("jpg", "png", "jpeg","gif"):
                     loaded_sample = self.get_item_image(index)
                 else:
                     loaded_sample = self.get_item_video(index)
@@ -258,7 +258,7 @@ class VideoDataset(torch.utils.data.Dataset):
         # GIF: read all frames using PIL, sample/extend to fpc frames, return as torch tensor [T H W 3]
         if ext == "gif":
             try:
-                with Image.open(sample) as img:
+                with Image.open('/kaggle/input/kinetics-workouts/dataset'+sample) as img:
                     frames = []
                     for fr in ImageSequence.Iterator(img):
                         fr_rgb = fr.convert("RGB")
