@@ -312,7 +312,7 @@ def run_one_epoch(
             clip_indices = [d.to(device, non_blocking=True) for d in data[2]]
             labels = data[1].to(device)
             batch_size = len(labels)
-
+            logger.info(f"data loaded: itr {itr} | batch-size {batch_size}")
             # Forward and prediction
             with torch.no_grad():
                 outputs = encoder(clips, clip_indices)
@@ -341,7 +341,7 @@ def run_one_epoch(
             [o.zero_grad() for o in optimizer]
 
         _agg_top1 = np.array([t1m.avg for t1m in top1_meters])
-        if itr % 10 == 0:
+        if itr % 1 == 0:
             logger.info(
                 "[%5d] %.3f%% [%.3f%% %.3f%%] [mem: %.2e]"
                 % (
