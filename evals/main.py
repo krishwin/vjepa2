@@ -49,7 +49,7 @@ def process_main(args, rank, fname, world_size, devices):
 
     os.environ["CUDA_VISIBLE_DEVICES"] = str(devices[rank].split(":")[-1])
     os.environ["LOG_FILE"] = os.path.join(args.folder, f"vjepa2{rank}.log")
-    logging.basicConfig(filename=os.environ["LOG_FILE"], level=logging.INFO)
+    logging.basicConfig(filename=os.environ["LOG_FILE"], level=logging.INFO,force=True)
     logger = logging.getLogger()
     if rank == 0:
         logger.setLevel(logging.INFO)
