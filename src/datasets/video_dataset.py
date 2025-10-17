@@ -198,6 +198,7 @@ class VideoDataset(torch.utils.data.Dataset):
 
         self.samples = samples
         self.labels = labels
+        self.label_to_id = {label: idx for idx, label in enumerate(sorted(set(labels)))}
 
     def __getitem__(self, index):
         sample = self.samples[index]
@@ -253,7 +254,7 @@ class VideoDataset(torch.utils.data.Dataset):
         fpc = self.dataset_fpcs[dataset_idx]
         # Handle multi-frame GIFs (treat like a short video) as well as static images.
         ext = sample.split(".")[-1].lower()
-        label = self.labels[index]
+        label = self.label_to_id[self.labels[index]]
         clip_indices = [np.arange(start=0, stop=fpc, dtype=np.int32)]
 
         # GIF: read all frames using PIL, sample/extend to fpc frames, return as torch tensor [T H W 3]
