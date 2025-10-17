@@ -259,7 +259,7 @@ class VideoDataset(torch.utils.data.Dataset):
         # GIF: read all frames using PIL, sample/extend to fpc frames, return as torch tensor [T H W 3]
         if ext in ("gif","webp"):
             try:
-                with Image.open('/kaggle/input/kinetics-workouts/dataset'+sample) as img:
+                with Image.open('/kaggle/input/kinetics-workouts/dataset/'+sample) as img:
                     frames = []
                     for fr in ImageSequence.Iterator(img):
                         fr_rgb = fr.convert("RGB")
