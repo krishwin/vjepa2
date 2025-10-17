@@ -36,7 +36,11 @@ DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
 
 
 def get_logger(name=None, force=False):
-    logging.basicConfig(stream=sys.stdout, level=logging.INFO, format=LOG_FORMAT, datefmt=DATE_FORMAT, force=force)
+    logfile = os.environ.get("LOG_FILE", f"{(name or 'vjepa')}.log")
+    d = os.path.dirname(logfile)
+    if d:
+        os.makedirs(d, exist_ok=True)
+    logging.basicConfig(filename=logfile, level=logging.INFO, format=LOG_FORMAT, datefmt=DATE_FORMAT, force=force)
     return logging.getLogger(name=name)
 
 
