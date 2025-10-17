@@ -54,7 +54,7 @@ def process_main(args, rank, fname, world_size, devices):
     if rank == 0:
         logger.setLevel(logging.INFO)
     else:
-        logger.setLevel(logging.ERROR)
+        logger.setLevel(logging.INFO)
 
     logger.info(f"called-params {fname}")
 
