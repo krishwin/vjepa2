@@ -203,6 +203,7 @@ class VideoDataset(torch.utils.data.Dataset):
         sample = self.samples[index]
         loaded_sample = False
         # Keep trying to load videos until you find a valid sample
+        logger.info(f"loading sample index {index}: {sample}")
         while not loaded_sample:
             if not isinstance(sample, str):
                 logger.warning("Invalid sample.")
