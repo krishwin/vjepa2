@@ -15,8 +15,8 @@ experiment:
     dataset_type: VideoDataset
     dataset_train: /kaggle/input/kinetics-workouts/dataset/train.csv
     dataset_val: /kaggle/input/kinetics-workouts/dataset/test.csv
-    frame_step: 4
-    frames_per_clip: 16
+    frame_step: 2
+    frames_per_clip: 8
     num_classes: 20
     num_segments: 1
     num_views_per_segment: 1
