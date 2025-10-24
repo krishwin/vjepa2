@@ -33,6 +33,8 @@ from src.utils.checkpoint_loader import robust_checkpoint_loader
 from src.utils.distributed import AllReduce, init_distributed
 from src.utils.logging import AverageMeter, CSVLogger
 
+import gc
+
 logging.basicConfig()
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -352,6 +354,9 @@ def run_one_epoch(
                     torch.cuda.max_memory_allocated() / 1024.0**2,
                 )
             )
+            del clips,clip_indices,labels,outputs,losses
+            gc.collect()
+            torch.cuda.empty_cache()
 
     return _agg_top1.max()
 
