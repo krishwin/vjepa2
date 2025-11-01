@@ -39,6 +39,7 @@ def init_module(
         )
         .to(device)
     )
+    model = model.half()
     model.eval()
     for p in model.parameters():
         p.requires_grad = False
