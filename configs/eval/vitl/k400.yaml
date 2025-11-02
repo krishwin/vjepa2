@@ -159,6 +159,7 @@ model_kwargs:
       tubelet_size: 2
       uniform_power: true
       use_rope: true
+      use_activation_checkpointing:  true
   wrapper_kwargs:
     max_frames: 128
     use_pos_embed: false
